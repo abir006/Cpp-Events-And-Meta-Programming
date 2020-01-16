@@ -11,7 +11,7 @@ using std::vector;
 template<typename T> class Subject {
   vector<Observer<T>*> observers_vec;
  public:
-  Subject(){};
+  Subject() = default;
   void notify(const T& t){
     for(Observer<T>* observer : observers_vec){
       observer->handleEvent(t);
@@ -28,7 +28,7 @@ template<typename T> class Subject {
   }
 
   void removeObserver(Observer<T>& observer_to_remove){
-   for(vector<Observer<T>*>::const_iterator it = observers_vec.cbegin() ; it != observers_vec.cend() ; ++it){
+   for(typename vector<Observer<T>*>::const_iterator it = observers_vec.cbegin() ; it != observers_vec.cend() ; ++it){
      if(*it == &observer_to_remove){
        observers_vec.erase(it);
        return;
