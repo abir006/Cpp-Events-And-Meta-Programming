@@ -88,7 +88,7 @@ struct SetAtIndex<0, U, List<T, TT...> > {
 template <int N, typename U, typename T, typename ...TT>
 struct SetAtIndex<N, U, List<T, TT...> > {
     static_assert(N >= 0, "SetAtIndex: INDEX IS ILLEGAL (must be non-negative)");
-    typedef typename PrependList<T, SetAtIndex <N - 1, U, List<TT...> > >::list list;
+    typedef typename PrependList<T,typename SetAtIndex<N - 1, U, List<TT...> >::list>::list list;
 };
 
 #endif //OOP_HW5_LIST_H
