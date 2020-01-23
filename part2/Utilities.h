@@ -53,4 +53,27 @@ struct GetCellDirectionInBoard {
             ::value::direction; /// Extracts the direction of the cell
 };
 
+/// Receives a board and indexes and returns the length of the vehicle
+template<typename B, int R, int C>
+struct GetCellLengthInBoard {
+    constexpr static int length =
+            GetAtIndex<C, typename /// Outer GetAtIndex - receives the result of the inner GetAtIndex, which will be a list (row)
+            GetAtIndex<R, typename B::board> /// Inner GetAtIndex - gets the list at row R and returns it's elements (value)
+            ::value> /// Outer GetAtIndex - takes the element in column C after getting row R
+            ::value::length; /// Extracts the length of the vehicle
+};
+
+template<typename B, int R, int C_, CellType T, Direction D, int L>
+struct SetBoardCell {
+    /*typedef typename GetAtIndex<R, typename B::board>::value Row; /// Get the row of the cell to be updated
+    typedef typename SetAtIndex<C_, BoardCell<T, D, L>, Row>::list updatedRow; /// Updated the vehicle in the relevant index
+    typedef typename SetAtIndex<R, updatedRow, B>::list updatedBoard; /// Update the board with the updated row*/
+
+    /// Equivalent to:
+    typedef typename
+            SetAtIndex<R, typename /// Update the entire row in the board
+            SetAtIndex<C_, BoardCell<T, D, L>, typename GetAtIndex<R, typename B::board>::value>::list, /// Get the row from the board and set the new value
+            B>::list updatedBoard; /// Get the board (list of lists) and assign to updatedBoard
+};
+
 #endif //OOP_HW5_UTILITIES_H

@@ -30,7 +30,6 @@ struct MoveVehicle {
             ((GetCellDirectionInBoard<B, R, C>::D == UP || GetCellDirectionInBoard<B, R, C>::D == DOWN) && (D == UP || D == DOWN)) ||
             ((GetCellDirectionInBoard<B, R, C>::D == LEFT || GetCellDirectionInBoard<B, R, C>::D == RIGHT) && (D == LEFT || D == RIGHT)),
             "MoveVehicle: MOVE DIRECTION DOES NOT MATCH CAR ORIENTATION (must be parallel)"); /// Make sure the car moves in a legal direction
-    // TODO check there are no cars in that direction or the car will not be out of bound
     typedef B board; //TODO to be completed
 };
 
@@ -54,6 +53,75 @@ struct FindCarRear {
 template<typename B, CellType T, int R>
 struct FindCarRear<B, T, R, 0> {
     constexpr static int rear = ConditionalInteger<GetCellTypeInBoard<B, R, 0>::T == T, 0, 1>::value; /// If we got to column 0, stop and set the rear index
+};
+
+/// Moves the entire vehicle one cell to the left
+template<typename B, int R, int C>
+struct MoveCarLeftOnce {
+    /// Get car details
+    constexpr static CellType T = GetCellTypeInBoard<B, R, C>::T;
+    constexpr static Direction D = GetCellDirectionInBoard<B, R, C>::D;
+    constexpr static int L = GetCellLengthInBoard<B, R, C>::length;
+    constexpr static int rear = FindCarRear<B, T, R, C>::rear;
+    constexpr static int front = rear + GetCellLengthInBoard<B, R, C>::length - 1;
+
+    static_assert((GetCellTypeInBoard<B, R, (rear - 1)>::T == EMPTY),
+                  "MoveVehicle: BOARD CELL ALREADY OCCUPIED"); /// Check that there's no car in the cell the car is moving to
+
+    typedef typename SetBoardCell<B, R, (rear - 1), T, LEFT, L>::updatedBoard B_; /// Move the rear one cell to the left
+    typedef typename SetBoardCell<B_ , R, front, EMPTY, D, 0>::updatedBoard updatedBoard; /// Erase the front cell
+};
+
+/// Moves the entire vehicle A cells to the left
+template<typename B, int R, int C, int A>
+struct MoveCarLeft {
+    /// Get car details
+    constexpr static CellType T = GetCellTypeInBoard<B, R, C>::T;
+    constexpr static int rear = FindCarRear<B, T, R, C>::rear;
+
+    typedef typename MoveCarLeftOnce<B, R, C>::updatedBoard B_; /// Move the car once to the left
+    typedef typename Conditional<(A - 1) >= 1, /// Check if we should move the car again
+            typename MoveCarLeft<B_, R, (rear - 1), (A - 1)>::updatedBoard, /// Call recursively with updated rear and amount
+            B_>::value updatedBoard; /// Otherwise, set the updated board as the current one
+};
+
+/// Moves the entire vehicle one cell to the right
+template<typename B, int R, int C>
+struct MoveCarRightOnce {
+    /// Get car details
+    constexpr static CellType T = GetCellTypeInBoard<B, R, C>::T;
+    constexpr static Direction D = GetCellDirectionInBoard<B, R, C>::D;
+    constexpr static int L = GetCellLengthInBoard<B, R, C>::length;
+    constexpr static int rear = FindCarRear<B, T, R, C>::rear;
+    constexpr static int front = rear + GetCellLengthInBoard<B, R, C>::length - 1;
+
+    static_assert((GetCellTypeInBoard<B, R, (front + 1)>::T == EMPTY),
+                  "MoveVehicle: BOARD CELL ALREADY OCCUPIED"); /// Check that there's no car in the cell the car is moving to
+
+    typedef typename SetBoardCell<B, R, (front + 1), T, RIGHT, L>::updatedBoard B_; /// Move the front one cell to the right
+    typedef typename SetBoardCell<B_ , R, rear, EMPTY, D, 0>::updatedBoard updatedBoard; /// Erase the rear cell
+};
+
+/// Moves the entire vehicle A cells to the right
+template<typename B, int R, int C, int A>
+struct MoveCarRight {
+    /// Get car details
+    constexpr static CellType T = GetCellTypeInBoard<B, R, C>::T;
+    constexpr static int rear = FindCarRear<B, T, R, C>::rear;
+    constexpr static int front = rear + GetCellLengthInBoard<B, R, C>::length - 1;
+
+    typedef typename MoveCarRightOnce<B, R, C>::updatedBoard B_; /// Move the car once to the right
+    typedef typename Conditional<(A - 1) >= 1, /// Check if we should move the car again
+            typename MoveCarRight<B_, R, (front + 1), (A - 1)>::updatedBoard, /// Call recursively with updated front and amount
+            B_>::value updatedBoard; /// Otherwise, set the updated board as the current one
+};
+
+/// Moves the entire car once
+/// IMPORTANT - This function assumes that the car is horizontal.
+template<typename B, int R, int C, Direction D, int A>
+struct MoveCarHorizontal {
+    typedef typename Conditional<D == LEFT, typename MoveCarLeft<B, R, C, A>::updatedBoard, /// If D == LEFT call MoveCarLeft
+            typename MoveCarRight<B, R, C, A>::updatedBoard>::value updatedBoard; /// Otherwise, call MoveCarRight
 };
 
 #endif //OOP_HW5_MOVEVEHICLE_H

@@ -10,8 +10,8 @@
 #include "CellType.h"
 
 /// The c'tor receives the board as a list of lists and holds it's dimensions.
-template<typename B> /// The board type doesn't need to be specified as we are assured to have a correct input
-struct GameBoard {
+    template<typename B> /// The board type doesn't need to be specified as we are assured to have a correct input
+    struct GameBoard {
     typedef B board; /// Using typedef as we only have the type B and not a concrete value
     // TODO make sure the board is set alright
     constexpr static int width = B::head::size; /// The width is the number of columns, which is the number of elements in each list.
