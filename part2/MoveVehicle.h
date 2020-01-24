@@ -21,8 +21,6 @@ struct Move {
     constexpr static int amount = A;
 };
 
-
-
 /// Receives the board, a horizontal car and current index and finds the rear of the car (left side).
 /// IMPORTANT - this method assumes that (Board[R, C] == T) for the initial R, C
 template<typename B, CellType T, int R, int C>
@@ -108,16 +106,16 @@ struct MoveCarHorizontal {
             typename MoveCarRight<B, R, C, A>::updatedBoard>::value updatedBoard; /// Otherwise, call MoveCarRight
 };
 
-/// IMPORTANT - this function asumes that the car is vertical.
+/// IMPORTANT - this function assumes that the car is vertical.
 template<typename B, int R, int C, Direction D, int A>
 struct MoveCarVertical {
-    ///check that up = left (what i assume) or up = right.
+    ///TODO make sure that up = left (what i assume) or up = right.
     typedef B board;
-    constexpr static int  new_direction = ConditionalInteger<D == UP, LEFT, RIGHT>::value;
-    typedef typename Transpose<B>::matrix transposed_board; ///transpose the board.
+    constexpr static Direction new_direction = ConditionalInteger<D == UP, LEFT, RIGHT>::value;
+    typedef typename Transpose<B>::matrix transposed_board; ///Transpose the board.
     typedef typename Conditional<new_direction == LEFT, typename MoveCarLeft<transposed_board, R, C, A>::updatedBoard, /// If D == LEFT call MoveCarLeft
             typename MoveCarRight<B, R, C, A>::updatedBoard>::value temp_updatedBoard; /// Otherwise, call MoveCarRight
-    typedef typename Transpose<temp_updatedBoard>::matrix updateBoard;   ///after finishing transpose the board again.
+    typedef typename Transpose<temp_updatedBoard>::matrix updateBoard;   ///After moving, transpose the board again.
 };
 
 /// Receives the current board, row & column, direction and length to move and updates the board.
@@ -130,16 +128,10 @@ struct MoveVehicle {
             ((GetCellDirectionInBoard<B, R, C>::D == UP || GetCellDirectionInBoard<B, R, C>::D == DOWN) && (D == UP || D == DOWN)) ||
             ((GetCellDirectionInBoard<B, R, C>::D == LEFT || GetCellDirectionInBoard<B, R, C>::D == RIGHT) && (D == LEFT || D == RIGHT)),
             "MoveVehicle: MOVE DIRECTION DOES NOT MATCH CAR ORIENTATION (must be parallel)"); /// Make sure the car moves in a legal direction
-    typedef typename Conditional<A == 0, B,  /// outer condition if we want to move amount of 0 , than we return board without changes
-    typename Conditional<D == LEFT || D == RIGHT,  ///inner condition check if the move is horizontal move
-    typename MoveCarHorizontal<B,R,C,D,A>::updatedBoard,  ///if its horizontal sends to horizontal move
-    typename MoveCarVertical<B,R,C,D,A>::updateBoard>::value>::value board;    ///if its vertical sends to vertical move
-};
-
-// TODO deal with the case where A = 0
-template<typename B, int R, int C, Direction D>
-struct MoveVehicle<B, R, C, D, 0> {
-    typedef B board; //TODO to be completed
+    typedef typename Conditional<A == 0, B, /// Outer condition - if we want to move amount of 0 , then we return the board without changes
+             typename Conditional<D == LEFT || D == RIGHT, /// Otherwise, go to inner condition - check if the move is horizontal
+                      typename MoveCarHorizontal<B, R, C, D, A>::updatedBoard, /// If its horizontal sends to horizontal move
+                      typename MoveCarVertical<B, R, C, D, A>::updateBoard>::value>::value board; /// If its vertical sends to vertical move
 };
 
 #endif //OOP_HW5_MOVEVEHICLE_H
