@@ -7,7 +7,6 @@
 using std::vector;
 
 template<typename T> class Subject {
-
     vector<Observer<T>*> observers_vec;
 
 public:
@@ -30,7 +29,7 @@ public:
     }
 
     void removeObserver(Observer<T>& observer_to_remove) {
-      for (typename vector<Observer<T>*>::const_iterator it = observers_vec.cbegin(); it != observers_vec.cend(); ++it) {
+      for ( typename vector<Observer<T>*>::const_iterator it = observers_vec.cbegin(); it != observers_vec.cend(); ++it) {
         if (*it == &observer_to_remove) {
           observers_vec.erase(it);
           return;
