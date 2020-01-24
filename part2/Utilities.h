@@ -113,6 +113,11 @@ struct isCarInRow<B, T, 0, C> {
     constexpr static int col = ConditionalInteger<GetCellTypeInBoard<B, 0, C>::T == T, C, isCarInRow<B, T, 0, C - 1>::col>::value;
 };
 
+template<typename B, CellType T>
+struct isCarInRow<B, T, 0, 0> {
+    constexpr static int col = ConditionalInteger<GetCellTypeInBoard<B, 0, 0>::T == T, 0, -1>::value;
+};
+
 /// Getting a car row and col.
 template<typename B, CellType T, int R, int C>
 struct FindCar {
@@ -120,17 +125,41 @@ struct FindCar {
     constexpr static int row = ConditionalInteger<isCarInRow<B, T, R, C>::col != -1, R, FindCar<B, T, R - 1, C>::row>::value;
     /// Same checks, except returning the col instead of row.
     constexpr static int col = ConditionalInteger<isCarInRow<B, T, R, C>::col != -1, isCarInRow<B, T, R, C>::col, FindCar<B,T, R - 1,C>::col>::value;
-    static_assert(col != -1, "FindCar: Car not found");
-    static_assert(row != -1, "FindCar: Car not found");
 };
 
-template<typename B, int R, int C>
+/// Getting a car row and col.
+template<typename B, CellType T, int C>
+struct FindCar<B,T,0,C> {
+    /// Checking if the car is in the row (will start from last row), if it is, will return the row, else will check if its in previous row.
+    constexpr static int row = ConditionalInteger<isCarInRow<B, T, 0, C>::col != -1, 0, -1>::value;
+    /// Same checks, except returning the col instead of row.
+    constexpr static int col = ConditionalInteger<isCarInRow<B, T, 0, C>::col != -1, isCarInRow<B, T, 0, C>::col, -1>::value;
+};
+
+/*template<typename B, int R, int C>
 struct checkIfAllColsEmptyOrRed{
     constexpr static bool result =
             /// Outer condition - checks if type is NOT x or empty
             ConditionalInteger<GetCellTypeInBoard<B, R, C>::T != X && GetCellTypeInBoard<B, R, C>::T != EMPTY, false, // False if other than EMPTY/X
                     /// Inner condition - if it's X or EMPTY check if next col is out of bounds, if so return True, else check next col.
                     ConditionalInteger<B::width <= C + 1, true, checkIfAllColsEmptyOrRed<B, R, C + 1>::result>::value>::value;
+};*/
+
+template<typename B, int R, int C>
+struct checkIfAllColsEmptyOrRed{
+    constexpr static bool result =
+            /// Outer condition - checks if type is NOT x or empty
+            ConditionalInteger<GetCellTypeInBoard<B, R, C>::T == X , true, // False if other than EMPTY/X
+                    /// Inner condition - if it's X or EMPTY check if next col is out of bounds, if so return True, else check next col.
+                    ConditionalInteger<GetCellTypeInBoard<B, R, C>::T == EMPTY,checkIfAllColsEmptyOrRed<B, R, C - 1>::result,false>::value>::value;
 };
+
+template<typename B, int R>
+struct checkIfAllColsEmptyOrRed<B,R,0>{
+    constexpr static bool result =
+            /// Outer condition - checks if type is NOT x or empty
+            ConditionalInteger<GetCellTypeInBoard<B, R, C>::T == X , true ,false>::value;
+};
+
 
 #endif //OOP_HW5_UTILITIES_H
