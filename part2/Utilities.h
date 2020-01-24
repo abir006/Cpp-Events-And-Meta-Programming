@@ -86,12 +86,6 @@ struct SetBoardCell {
     typedef typename SetAtIndex<C_, BoardCell<T, D, L>, Row>::list updatedRow; /// Updated the vehicle in the relevant index
     typedef typename SetAtIndex<R, updatedRow, typename B::board>::list B_; /// Update the board with the updated row
     typedef GameBoard<B_> updatedBoard;
-
-    /// Equivalent to:
-/*    typedef typename
-            SetAtIndex<R, typename /// Update the entire row in the board
-            SetAtIndex<C_, BoardCell<T, D, L>, typename GetAtIndex<R, typename B::board>::value>::list, /// Get the row from the board and set the new value
-            B>::list updatedBoard; /// Get the board (list of lists) and assign to updatedBoard*/
 };
 
 /// Checking if the car is in this row (except for col 0 which will be in next struct).
@@ -135,15 +129,6 @@ struct FindCar<B,T,0,C> {
     /// Same checks, except returning the col instead of row.
     constexpr static int col = ConditionalInteger<isCarInRow<B, T, 0, C>::col != -1, isCarInRow<B, T, 0, C>::col, -1>::value;
 };
-
-/*template<typename B, int R, int C>
-struct checkIfAllColsEmptyOrRed{
-    constexpr static bool result =
-            /// Outer condition - checks if type is NOT x or empty
-            ConditionalInteger<GetCellTypeInBoard<B, R, C>::T != X && GetCellTypeInBoard<B, R, C>::T != EMPTY, false, // False if other than EMPTY/X
-                    /// Inner condition - if it's X or EMPTY check if next col is out of bounds, if so return True, else check next col.
-                    ConditionalInteger<B::width <= C + 1, true, checkIfAllColsEmptyOrRed<B, R, C + 1>::result>::value>::value;
-};*/
 
 template<typename B, int R, int C>
 struct checkIfAllColsEmptyOrRed{
