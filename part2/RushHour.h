@@ -12,9 +12,8 @@ struct CheckWin {
     /// Gets the red car row using FindCar in utils.
     constexpr static int red_car_row = FindCar<B, X, B::length - 1, B::width - 1>::row;
     /// Gets the red car col using FindCar in utils.
-    constexpr static int red_car_col = FindCar<B, X, B::length - 1, B::width - 1>::col;
     /// Check if all the cols to the right of the red car are empty or red.
-    constexpr static bool result = checkIfAllColsEmptyOrRed<B, red_car_row, red_car_col>::result;
+    constexpr static bool result = checkIfAllColsEmptyOrRed<B, red_car_row, B::width - 1>::result;
 };
 
 /// Handles a NON-empty move list in M.

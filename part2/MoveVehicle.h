@@ -169,7 +169,6 @@ struct MoveCarVertical {};
 
 template<typename B, int R, int C, int A>
 struct MoveCarVertical<B,R,C,UP,A> {
-    ///TODO make sure that up = left (what i assume) or up = right.
     typedef typename Transpose<typename B::board>::matrix transposed_board; ///Transpose the board.
     typedef GameBoard<transposed_board> B_;
     typedef typename MoveCarLeft<B_, C, R, A>::updatedBoard temp_updatedBoard;
@@ -178,7 +177,6 @@ struct MoveCarVertical<B,R,C,UP,A> {
 
 template<typename B, int R, int C, int A>
 struct MoveCarVertical<B,R,C,DOWN,A> {
-    ///TODO make sure that up = left (what i assume) or up = right.
     typedef typename Transpose<typename B::board>::matrix transposed_board; ///Transpose the board.
     typedef  GameBoard<transposed_board> B_;
     typedef typename MoveCarRight<B_, C, R, A>::updatedBoard temp_updatedBoard;

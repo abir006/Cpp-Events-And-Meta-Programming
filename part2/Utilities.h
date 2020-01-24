@@ -158,7 +158,7 @@ template<typename B, int R>
 struct checkIfAllColsEmptyOrRed<B,R,0>{
     constexpr static bool result =
             /// Outer condition - checks if type is NOT x or empty
-            ConditionalInteger<GetCellTypeInBoard<B, R, C>::T == X , true ,false>::value;
+            ConditionalInteger<GetCellTypeInBoard<B, R, 0>::T == X , true ,false>::value;
 };
 
 
