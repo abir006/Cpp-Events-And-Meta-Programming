@@ -21,22 +21,6 @@ struct Move {
     constexpr static int amount = A;
 };
 
-/// Receives the board, a horizontal car and current index and finds the rear of the car (left side).
-/// IMPORTANT - this method assumes that (Board[R, C] == T) for the initial R, C
-template<typename B, CellType T, int R, int C>
-struct FindCarRear {
-    constexpr static int rear =
-            ConditionalInteger<GetCellTypeInBoard<B, R, C>::T == T, /// Apply a condition by the vehicle in the current index, as in true if it's T
-            FindCarRear<B, T, R, C - 1>::rear, /// If it equals to T, call recursively for the previous column
-            (C + 1)>::value; /// If it does not equal to T, the result will be the previous column
-};
-
-/// Stopping criteria for FindCarRear - if we reached column 0, it's 0 if the current cell is T or 1 if it's different than T
-template<typename B, CellType T, int R>
-struct FindCarRear<B, T, R, 0> {
-    constexpr static int rear = ConditionalInteger<GetCellTypeInBoard<B, R, 0>::T == T, 0, 1>::value; /// If we got to column 0, stop and set the rear index
-};
-
 /// Moves the entire vehicle one cell to the left
 template<typename B, int R, int C>
 struct MoveCarLeftOnce {
@@ -60,6 +44,7 @@ struct MoveCarLeft {
     /// Get car details
     constexpr static CellType T = GetCellTypeInBoard<B, R, C>::T;
     constexpr static int rear = FindCarRear<B, T, R, C>::rear;
+    static_assert(rear - A >= 0, "MoveCarLeft: INDEX OUT OF BOUND");
 
     typedef typename MoveCarLeftOnce<B, R, C>::updatedBoard B_; /// Move the car once to the left
     typedef typename Conditional<(A - 1) >= 1, /// Check if we should move the car again
@@ -91,6 +76,7 @@ struct MoveCarRight {
     constexpr static CellType T = GetCellTypeInBoard<B, R, C>::T;
     constexpr static int rear = FindCarRear<B, T, R, C>::rear;
     constexpr static int front = rear + GetCellLengthInBoard<B, R, C>::length - 1;
+    static_assert(front + A < B::width, "MoveCarRight: INDEX OUT OF BOUND");
 
     typedef typename MoveCarRightOnce<B, R, C>::updatedBoard B_; /// Move the car once to the right
     typedef typename Conditional<(A - 1) >= 1, /// Check if we should move the car again
@@ -110,12 +96,12 @@ struct MoveCarHorizontal {
 template<typename B, int R, int C, Direction D, int A>
 struct MoveCarVertical {
     ///TODO make sure that up = left (what i assume) or up = right.
-    typedef B board;
     constexpr static Direction new_direction = ConditionalInteger<D == UP, LEFT, RIGHT>::value;
-    typedef typename Transpose<B>::matrix transposed_board; ///Transpose the board.
-    typedef typename Conditional<new_direction == LEFT, typename MoveCarLeft<transposed_board, R, C, A>::updatedBoard, /// If D == LEFT call MoveCarLeft
-            typename MoveCarRight<B, R, C, A>::updatedBoard>::value temp_updatedBoard; /// Otherwise, call MoveCarRight
-    typedef typename Transpose<temp_updatedBoard>::matrix updateBoard;   ///After moving, transpose the board again.
+    typedef typename Transpose<typename B::board>::matrix transposed_board; ///Transpose the board.
+    typedef GameBoard<transposed_board> B_;
+    typedef typename Conditional<new_direction == LEFT, typename MoveCarLeft<B_, R, C, A>::updatedBoard, /// If D == LEFT call MoveCarLeft
+            typename MoveCarRight<B_, R, C, A>::updatedBoard>::value temp_updatedBoard; /// Otherwise, call MoveCarRight
+    typedef GameBoard<typename Transpose<typename temp_updatedBoard::board>::matrix> updatedBoard;   ///After moving, transpose the board again.
 };
 
 /// Receives the current board, row & column, direction and length to move and updates the board.
@@ -131,7 +117,7 @@ struct MoveVehicle {
     typedef typename Conditional<A == 0, B, /// Outer condition - if we want to move amount of 0 , then we return the board without changes
              typename Conditional<D == LEFT || D == RIGHT, /// Otherwise, go to inner condition - check if the move is horizontal
                       typename MoveCarHorizontal<B, R, C, D, A>::updatedBoard, /// If its horizontal sends to horizontal move
-                      typename MoveCarVertical<B, R, C, D, A>::updateBoard>::value>::value board; /// If its vertical sends to vertical move
+                      typename MoveCarVertical<B, R, C, D, A>::updatedBoard>::value>::value board; /// If its vertical sends to vertical move
 };
 
 #endif //OOP_HW5_MOVEVEHICLE_H

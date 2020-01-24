@@ -61,7 +61,7 @@ struct GetAtIndex<0, List<T, TT...> >{
 /// GetAtIndex for a List, only if N>=0, continues recursively until N=0, value will be the type.
 template<int N, typename T, typename ...TT>
 struct GetAtIndex<N, List<T, TT...> > {
-    static_assert(N >= 0, "GetAtIndex: INDEX IS ILLEGAL (must be non-negative)");
+    static_assert(N > 0, "GetAtIndex: INDEX IS ILLEGAL (must be non-negative)");
     typedef typename GetAtIndex<N - 1, List<TT...> >::value value;
 };
 
@@ -87,7 +87,7 @@ struct SetAtIndex<0, U, List<T, TT...> > {
 /// The value will be set in the end of the recursion when N=0.
 template <int N, typename U, typename T, typename ...TT>
 struct SetAtIndex<N, U, List<T, TT...> > {
-    static_assert(N >= 0, "SetAtIndex: INDEX IS ILLEGAL (must be non-negative)");
+    static_assert(N > 0, "SetAtIndex: INDEX IS ILLEGAL (must be non-negative)");
     typedef typename PrependList<T,typename SetAtIndex<N - 1, U, List<TT...> >::list>::list list;
 };
 
