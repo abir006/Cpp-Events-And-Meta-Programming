@@ -1,7 +1,7 @@
 #ifndef PART2_PRINTER_H
 #define PART2_PRINTER_H
 
-#include "RushHour.h"
+//#include "RushHour.h"
 #include <iostream>
 
 /**
