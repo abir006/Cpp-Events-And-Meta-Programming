@@ -1,7 +1,6 @@
 #ifndef PART2_TRANSPOSELIST_H
 #define PART2_TRANSPOSELIST_H
 
-#include "RushHour.h"
 
 template<typename TList>
 struct AsVerticalList{
